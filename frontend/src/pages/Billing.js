@@ -12,7 +12,7 @@ function Billing() {
   const [billing, setBilling] = useState(null);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8001/api/v1/billing/summary")
+    fetch("https://vkhtgvxfunkeau4aojvqfliu3q0gtvns.lambda-url.ap-south-1.on.aws/api/v1/billing/summary")
       .then((res) => res.json())
       .then((data) => setBilling(data));
   }, []);

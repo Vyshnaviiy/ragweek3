@@ -22,8 +22,8 @@ function Analytics() {
   useEffect(() => {
     setLoading(true);
     setError(null);
+    fetch(`https://vkhtgvxfunkeau4aojvqfliu3q0gtvns.lambda-url.ap-south-1.on.aws/api/v1/analytics/history?period=${activeTab}`)
 
-    fetch(`http://127.0.0.1:8001/api/v1/analytics/history?period=${activeTab}`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Unable to load analytics data");

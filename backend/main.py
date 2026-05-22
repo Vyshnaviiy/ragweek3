@@ -4,13 +4,21 @@ from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import mock_data
 from datetime import datetime
+from mangum import Mangum
 
 app = FastAPI(title="VoltStream API", version="1.0.0")
+@app.get("/")
+async def root():
+    return {"message": "VoltStream Backend Running"}
 
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3003"],  # React dev server ports
+    allow_origins=[
+    "http://localhost:3000",
+    "http://localhost:3003",
+    "http://voltstream-frontend-v.s3-website-ap-south-2.amazonaws.com"
+], # React dev server ports
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -103,3 +111,4 @@ async def chat_with_ai(request: ChatRequest):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8001, reload=True)
+handler = Mangum(app)

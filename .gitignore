@@ -1,0 +1,14 @@
+# React
+frontend/node_modules
+frontend/build
+
+# Python
+backend/venv
+backend/package
+backend/__pycache__
+
+# Lambda deployment zip
+backend/lambda.zip
+
+# Environment files
+.env

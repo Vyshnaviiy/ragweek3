@@ -26,7 +26,7 @@ function Devices() {
 
   // Fetch devices
   const loadDevices = () => {
-    fetch("http://127.0.0.1:8001/api/v1/devices")
+    fetch("https://vkhtgvxfunkeau4aojvqfliu3q0gtvns.lambda-url.ap-south-1.on.aws/api/v1/devices")
       .then((res) => res.json())
       .then((data) => setDevices(Array.isArray(data) ? data : data.devices || []));
   };
@@ -41,8 +41,8 @@ function Devices() {
     if (!device) return;
 
     const newStatus = device.status === "ON" ? "OFF" : "ON";
+    await fetch(`https://vkhtgvxfunkeau4aojvqfliu3q0gtvns.lambda-url.ap-south-1.on.aws/api/v1/devices/${id}`, {
 
-    await fetch(`http://127.0.0.1:8001/api/v1/devices/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus })

@@ -39,7 +39,7 @@ function Chatbot() {
     setIsTyping(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:8001/api/v1/chat", {
+      const response = await fetch("https://vkhtgvxfunkeau4aojvqfliu3q0gtvns.lambda-url.ap-south-1.on.aws/api/v1/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
