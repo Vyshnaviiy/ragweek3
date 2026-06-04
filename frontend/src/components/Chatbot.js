@@ -6,21 +6,37 @@ import { MessageCircle, Send, X, Bot, User } from "lucide-react";
 function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      type: "bot",
-      content:
-        "Hi! I'm your VoltStream AI assistant. I can help you with energy management, device control, billing questions, and usage analytics.",
-      timestamp: new Date(),
-    },
-  ]);
+  const [generalMessages, setGeneralMessages] = useState([
+  {
+    id: 1,
+    type: "bot",
+    content:
+      "Hi! I'm your VoltStream AI assistant. I can help you with energy management, device control, billing questions, and usage analytics.",
+    timestamp: new Date(),
+  },
+]);
+
+const [knowledgeMessages, setKnowledgeMessages] = useState([
+  {
+    id: 1,
+    type: "bot",
+    content:
+      "Ask questions from the uploaded knowledge base.",
+    timestamp: new Date(),
+  },
+]);
+
+  
 
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
 
   // NEW TAB STATE
   const [activeTab, setActiveTab] = useState("general");
+  const messages =
+  activeTab === "knowledge"
+    ? knowledgeMessages
+    : generalMessages;
 
   const messagesEndRef = useRef(null);
 
@@ -31,20 +47,33 @@ function Chatbot() {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  scrollToBottom();
+}, [generalMessages, knowledgeMessages]);
+
 
   const sendMessage = async () => {
     if (!inputMessage.trim()) return;
 
     const userMessage = {
-      id: messages.length + 1,
+  id: Date.now(),
+
       type: "user",
       content: inputMessage,
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    if (activeTab === "knowledge") {
+  setKnowledgeMessages((prev) => [
+    ...prev,
+    userMessage,
+  ]);
+} else {
+  setGeneralMessages((prev) => [
+    ...prev,
+    userMessage,
+  ]);
+}
+
 
     setInputMessage("");
     setIsTyping(true);
@@ -82,25 +111,49 @@ function Chatbot() {
       const data = await response.json();
 
       const botMessage = {
-        id: messages.length + 2,
+  id: Date.now() + 1,
+
         type: "bot",
         content: data.response,
         timestamp: new Date(),
       };
 
-      setMessages((prev) => [...prev, botMessage]);
+      if (activeTab === "knowledge") {
+  setKnowledgeMessages((prev) => [
+    ...prev,
+    botMessage,
+  ]);
+} else {
+  setGeneralMessages((prev) => [
+    ...prev,
+    botMessage,
+  ]);
+}
+
     } catch (error) {
       console.error("Chat error:", error);
 
       const errorMessage = {
-        id: messages.length + 2,
+  id: Date.now() + 1,
+
         type: "bot",
         content:
           "Sorry, I'm having trouble connecting right now. Please try again later.",
         timestamp: new Date(),
       };
 
-      setMessages((prev) => [...prev, errorMessage]);
+      if (activeTab === "knowledge") {
+  setKnowledgeMessages((prev) => [
+    ...prev,
+    errorMessage,
+  ]);
+} else {
+  setGeneralMessages((prev) => [
+    ...prev,
+    errorMessage,
+  ]);
+}
+
     } finally {
       setIsTyping(false);
     }
