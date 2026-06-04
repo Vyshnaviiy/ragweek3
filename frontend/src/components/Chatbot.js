@@ -1,23 +1,33 @@
+
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Send, X, Bot, User } from "lucide-react";
 
 function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
+
   const [messages, setMessages] = useState([
     {
       id: 1,
       type: "bot",
-      content: "Hi! I'm your VoltStream AI assistant. I can help you with energy management, device control, billing questions, and usage analytics. How can I assist you today?",
-      timestamp: new Date()
-    }
+      content:
+        "Hi! I'm your VoltStream AI assistant. I can help you with energy management, device control, billing questions, and usage analytics.",
+      timestamp: new Date(),
+    },
   ]);
+
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+
+  // NEW TAB STATE
+  const [activeTab, setActiveTab] = useState("general");
+
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
   };
 
   useEffect(() => {
@@ -31,32 +41,42 @@ function Chatbot() {
       id: messages.length + 1,
       type: "user",
       content: inputMessage,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
+
     setInputMessage("");
     setIsTyping(true);
 
     try {
-      const response = await fetch("https://vkhtgvxfunkeau4aojvqfliu3q0gtvns.lambda-url.ap-south-1.on.aws/api/v1/chat", {
+      // DYNAMIC ENDPOINT
+      const endpoint =
+        activeTab === "knowledge"
+          ? "http://127.0.0.1:8000/api/v1/qa"
+          : "http://127.0.0.1:8000/api/v1/chat";
+
+      const response = await fetch(endpoint, {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
         },
+
         body: JSON.stringify({
           message: inputMessage,
+
           context: {
             current_page: window.location.pathname,
+
             user_data: {
-              // Add relevant user context here
               dashboard_data: true,
               analytics_data: true,
               devices_data: true,
-              billing_data: true
-            }
-          }
-        })
+              billing_data: true,
+            },
+          },
+        }),
       });
 
       const data = await response.json();
@@ -65,19 +85,22 @@ function Chatbot() {
         id: messages.length + 2,
         type: "bot",
         content: data.response,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, botMessage]);
+      setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error("Chat error:", error);
+
       const errorMessage = {
         id: messages.length + 2,
         type: "bot",
-        content: "Sorry, I'm having trouble connecting right now. Please try again later.",
-        timestamp: new Date()
+        content:
+          "Sorry, I'm having trouble connecting right now. Please try again later.",
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsTyping(false);
     }
@@ -86,13 +109,14 @@ function Chatbot() {
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
+
       sendMessage();
     }
   };
 
   return (
     <>
-      {/* Chat Toggle Button */}
+      {/* CHAT TOGGLE BUTTON */}
       <motion.button
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
@@ -106,13 +130,13 @@ function Chatbot() {
           shadow-2xl hover:shadow-cyan-500/30
           flex items-center justify-center
           transition-all duration-300
-          ${isOpen ? 'rotate-45' : ''}
+          ${isOpen ? "rotate-45" : ""}
         `}
       >
         <MessageCircle size={24} className="text-white" />
       </motion.button>
 
-      {/* Chat Window */}
+      {/* CHAT WINDOW */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -122,7 +146,7 @@ function Chatbot() {
             transition={{ duration: 0.3 }}
             className="
               fixed bottom-24 right-6 z-40
-              w-96 h-[500px]
+              w-96 h-[550px]
               bg-gradient-to-br from-[#111827]/95 to-[#1E293B]/95
               backdrop-blur-xl
               rounded-3xl
@@ -132,21 +156,30 @@ function Chatbot() {
               overflow-hidden
             "
           >
-            {/* Header */}
-            <div className="
+            {/* HEADER */}
+            <div
+              className="
               p-4 border-b border-gray-800/50
               bg-gradient-to-r from-cyan-500/10 to-blue-500/10
-            ">
+            "
+            >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center">
                     <Bot size={16} className="text-white" />
                   </div>
+
                   <div>
-                    <h3 className="text-white font-semibold">VoltStream AI</h3>
-                    <p className="text-gray-400 text-sm">Energy Management Assistant</p>
+                    <h3 className="text-white font-semibold">
+                      VoltStream AI
+                    </h3>
+
+                    <p className="text-gray-400 text-sm">
+                      Energy Management Assistant
+                    </p>
                   </div>
                 </div>
+
                 <button
                   onClick={() => setIsOpen(false)}
                   className="text-gray-400 hover:text-white transition-colors"
@@ -154,37 +187,83 @@ function Chatbot() {
                   <X size={20} />
                 </button>
               </div>
+
+              {/* NEW TABS */}
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => setActiveTab("general")}
+                  className={`
+                    px-3 py-1 rounded-lg text-xs font-medium
+                    transition-all duration-200
+                    ${
+                      activeTab === "general"
+                        ? "bg-cyan-500 text-white"
+                        : "bg-gray-700/50 text-gray-300"
+                    }
+                  `}
+                >
+                  General Chat
+                </button>
+
+                <button
+                  onClick={() => setActiveTab("knowledge")}
+                  className={`
+                    px-3 py-1 rounded-lg text-xs font-medium
+                    transition-all duration-200
+                    ${
+                      activeTab === "knowledge"
+                        ? "bg-cyan-500 text-white"
+                        : "bg-gray-700/50 text-gray-300"
+                    }
+                  `}
+                >
+                  Knowledge QA
+                </button>
+              </div>
             </div>
 
-            {/* Messages */}
+            {/* MESSAGES */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.map((message) => (
                 <motion.div
                   key={message.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`flex gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex gap-3 ${
+                    message.type === "user"
+                      ? "justify-end"
+                      : "justify-start"
+                  }`}
                 >
-                  {message.type === 'bot' && (
+                  {message.type === "bot" && (
                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center flex-shrink-0">
                       <Bot size={14} className="text-white" />
                     </div>
                   )}
 
-                  <div className={`
+                  <div
+                    className={`
                     max-w-[70%] p-3 rounded-2xl
-                    ${message.type === 'user'
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white'
-                      : 'bg-[#374151]/50 text-gray-200 border border-gray-700/50'
+                    ${
+                      message.type === "user"
+                        ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white"
+                        : "bg-[#374151]/50 text-gray-200 border border-gray-700/50"
                     }
-                  `}>
-                    <p className="text-sm leading-relaxed">{message.content}</p>
+                  `}
+                  >
+                    <p className="text-sm leading-relaxed">
+                      {message.content}
+                    </p>
+
                     <p className="text-xs opacity-70 mt-1">
-                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {message.timestamp.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </p>
                   </div>
 
-                  {message.type === 'user' && (
+                  {message.type === "user" && (
                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-gray-600 to-gray-700 flex items-center justify-center flex-shrink-0">
                       <User size={14} className="text-white" />
                     </div>
@@ -192,7 +271,7 @@ function Chatbot() {
                 </motion.div>
               ))}
 
-              {/* Typing Indicator */}
+              {/* TYPING */}
               {isTyping && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -202,11 +281,20 @@ function Chatbot() {
                   <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center">
                     <Bot size={14} className="text-white" />
                   </div>
+
                   <div className="bg-[#374151]/50 p-3 rounded-2xl border border-gray-700/50">
                     <div className="flex space-x-1">
                       <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+
+                      <div
+                        className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.1s" }}
+                      ></div>
+
+                      <div
+                        className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0.2s" }}
+                      ></div>
                     </div>
                   </div>
                 </motion.div>
@@ -215,15 +303,21 @@ function Chatbot() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
+            {/* INPUT */}
             <div className="p-4 border-t border-gray-800/50">
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
+                  onChange={(e) =>
+                    setInputMessage(e.target.value)
+                  }
                   onKeyPress={handleKeyPress}
-                  placeholder="Ask me anything about your energy usage..."
+                  placeholder={
+                    activeTab === "knowledge"
+                      ? "Ask questions from uploaded documents..."
+                      : "Ask me anything about your energy usage..."
+                  }
                   className="
                     flex-1 px-4 py-2
                     bg-[#374151]/50
@@ -234,6 +328,7 @@ function Chatbot() {
                     transition-all duration-200
                   "
                 />
+
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -259,3 +354,4 @@ function Chatbot() {
 }
 
 export default Chatbot;
+

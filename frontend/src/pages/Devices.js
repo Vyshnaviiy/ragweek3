@@ -26,7 +26,7 @@ function Devices() {
 
   // Fetch devices
   const loadDevices = () => {
-    fetch("https://vkhtgvxfunkeau4aojvqfliu3q0gtvns.lambda-url.ap-south-1.on.aws/api/v1/devices")
+    fetch("http://127.0.0.1:8000/api/v1/devices")
       .then((res) => res.json())
       .then((data) => setDevices(Array.isArray(data) ? data : data.devices || []));
   };
