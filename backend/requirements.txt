@@ -3,3 +3,18 @@ uvicorn
 pydantic
 mangum
 python-multipart
+
+# AI
+ollama
+
+# RAG
+chromadb
+sentence-transformers
+pypdf
+
+# Agent
+strands-agents
+
+# Utilities
+numpy
+torch

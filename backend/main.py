@@ -17,6 +17,10 @@ from services.rag_service import (
     retrieve_chunks
 )
 
+from services.agent_service import (
+    run_agent
+)
+
 # =========================
 # FASTAPI APP
 # =========================
@@ -47,6 +51,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:3003",
+        "http://localhost:5173",
+        "http://localhost:5174",
         "http://voltstream-frontend-v.s3-website-ap-south-2.amazonaws.com"
     ],
     allow_credentials=True,
@@ -81,6 +87,10 @@ class ChatResponse(BaseModel):
 
     response: str
     timestamp: datetime
+
+class AgentRequest(BaseModel):
+
+    message: str    
 
 
 # =========================
@@ -223,6 +233,34 @@ async def qa_with_rag(
             response=f"RAG Error: {str(e)}",
             timestamp=datetime.now()
         )
+
+# =========================
+# AGENT ENDPOINT (WEEK 4)
+# =========================
+@app.post("/api/v1/agent")
+async def agent_chat(
+    request: AgentRequest
+):
+
+    try:
+
+        result = run_agent(
+            request.message
+        )
+
+        return {
+            "response": result["response"],
+            "trace": result["trace"],
+            "timestamp": datetime.now()
+        }
+
+    except Exception as e:
+
+        return {
+            "response": f"Agent Error: {str(e)}",
+            "trace": [],
+            "timestamp": datetime.now()
+        }    
 
 
 # =========================
